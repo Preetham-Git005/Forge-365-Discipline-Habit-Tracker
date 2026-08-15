@@ -1,0 +1,16 @@
+{
+  "short_name": "Forge 365",
+  "name": "Forge 365 — Discipline & Habit Architecture",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E63946'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#040507",
+  "theme_color": "#E63946",
+  "display": "standalone",
+  "orientation": "portrait"
+}
