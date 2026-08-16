@@ -1,134 +1,240 @@
 # 🔥 Forge 365 — Discipline & Habit Tracker
 
-> **Build discipline. Track your progress. Forge your year.**
+> **Build discipline. Track consistency. Forge your year.**
 
-Forge 365 is a modern **365-day discipline and habit tracking application** designed to help users build consistent daily routines, track habits, maintain streaks, and analyze their progress throughout the year.
+Forge 365 is a **365-day discipline and habit tracking application** designed to help users build consistent routines, track daily execution, measure progress, and stay accountable throughout a full year.
 
-The application provides a focused, dark-themed dashboard with daily habit execution, progress tracking, analytics, milestones, and a complete year-long discipline matrix.
+The application combines habit tracking, streaks, yearly progress visualization, analytics, milestones, daily reflection, and a cinematic dark interface into one focused discipline system.
 
 ---
 
-## ✨ Features
+## ✨ Overview
 
-### 📅 Daily Rituals
+Forge 365 is built around a simple idea:
 
-* View all habits scheduled for the current day
-* Check in when a habit is completed
-* Track daily completion percentage
-* Organize habits by:
+> **Consistency over motivation.**
+
+Instead of only tracking whether a habit was completed, Forge 365 turns a full year of daily actions into a visual journey.
+
+Users can create habits, organize them by time and category, check them off each day, maintain streaks, review historical performance, and visualize their entire year through a 365-day discipline matrix.
+
+---
+
+## 🎯 Core Features
+
+### 🔥 Daily Habit Command Center
+
+* Track daily habits from a centralized dashboard
+* Check habits off as they are completed
+* Track custom daily quotas such as:
+
+  * Pages read
+  * Push-ups completed
+  * Water consumed
+  * Other measurable targets
+* Track individual habit streaks
+* Filter habits by:
 
   * Morning
   * Afternoon
   * Evening
   * Anytime
 
-### 🔥 Habit Streaks
+The application supports habit categories including:
 
-* Track consecutive days of habit completion
-* View individual habit streaks
-* Monitor daily progress
-* Encourage consistency through visual feedback
-
-### 🗓️ 365-Day Grid
-
-* Visualize discipline across an entire year
-* Track activity for every day
-* View historical and future dates
-* Identify consistent and inactive periods
-
-### 📊 Analytics
-
-* Total check-ins
-* Active days
-* Perfect 100% days
-* Overall discipline score
-* Progress insights
-
-### 🏆 Milestones
-
-* Track important achievements
-* Progress toward long-term goals
-* Celebrate consistency and discipline
-
-### 🌙 Evening Log
-
-* Review and record daily progress
-* Reflect on completed habits
-* Maintain a daily discipline record
-
-### ➕ Habit Management
-
-* Add new habits
-* Categorize habits
-* Set habit timing
-* Manage existing habits
-* Reorder habits
-
-### 🔎 Habit Search & Filtering
-
-* Search habits quickly
-* Filter habits by time of day
-* View all active habits
+* 🧠 Mind
+* 💪 Body
+* 🎨 Craft
+* 🧘 Soul
+* ⚡ Vitality
 
 ---
 
-## 🎨 Design
+### 🗓️ 365-Day Discipline Matrix
 
-Forge 365 uses a focused **dark-themed interface** inspired by discipline, performance, and personal growth.
+Forge 365 provides an interactive full-year tracking system inspired by contribution graphs.
 
-### Design principles
+Features include:
 
-* Minimal distractions
-* Clear progress indicators
-* Strong visual hierarchy
-* Responsive interface
-* Fast interactions
-* Mobile-friendly experience
+* 365-day visual grid
+* Completion-based intensity levels
+* Historical date inspection
+* Daily progress visualization
+* Year countdown
+* Days elapsed vs. days remaining
 
----
-
-## 🛠️ Tech Stack
-
-| Technology            | Purpose                    |
-| --------------------- | -------------------------- |
-| React                 | Frontend application       |
-| TypeScript            | Type-safe development      |
-| Vite                  | Development and build tool |
-| Tailwind CSS          | Styling and responsive UI  |
-| JavaScript/TypeScript | Application logic          |
-| HTML5                 | Application structure      |
-| CSS3                  | Custom styling             |
-| Git & GitHub          | Version control            |
+The goal is to make long-term consistency visible rather than relying only on daily statistics.
 
 ---
 
-## 📁 Project Structure
+### 📊 Growth & Analytics
+
+The application provides a dedicated analytics experience for understanding discipline and habit performance.
+
+Planned analytics include:
+
+* Daily completion trends
+* 7-day performance
+* 30-day performance
+* 90-day performance
+* 365-day performance
+* Category balance
+* Weekly performance distribution
+* Current streak
+* Best streak
+* Overall discipline statistics
+
+Charts are planned using **Recharts**.
+
+---
+
+### 🏆 XP, Levels & Milestones
+
+Forge 365 includes a progression system designed to make consistency rewarding.
+
+Users can earn XP through completed habits and progress through discipline levels.
+
+The planned progression ranges from:
+
+**Level 1 — Neophyte**
+
+to
+
+**Level 50 — Stoic Titan**
+
+The application also includes milestone concepts such as:
+
+* 🔥 7-Day Iron Chain
+* 🏰 30-Day Fortress
+* 💯 Century Club
+* 🏆 Unbroken 365
+
+---
+
+### 🌙 Daily Reflection
+
+Forge 365 includes an evening reflection system for recording:
+
+* Daily thoughts
+* Gratitude
+* Obstacles
+* End-of-day reflections
+
+This complements habit tracking by focusing not only on **what was completed**, but also on daily reflection and accountability.
+
+---
+
+### 🎨 Cinematic Dark Interface
+
+Forge 365 follows a dark cinematic minimalist design.
+
+The planned visual language includes:
+
+* Obsidian-style dark background
+* High-contrast interface
+* Crimson accents
+* Gold highlights
+* Ambient glow
+* Discipline and Stoic-inspired imagery
+* Minimal visual distractions
+
+The design direction is intended to create a focused environment for daily execution.
+
+---
+
+### 🎵 Focus & Sound
+
+The application includes support for optional audio feedback using the **Web Audio API**.
+
+This can provide satisfying completion sounds when habits are checked off, while still allowing the user to toggle sound effects.
+
+---
+
+## 💾 Data & Synchronization
+
+Forge 365 is designed around local-first data management.
+
+### Local Storage
+
+Habit and progress data can be automatically persisted using:
 
 ```text
-forge-365/
-│
-├── public/
-│
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── context/
-│   ├── types/
-│   ├── utils/
-│   │
-│   ├── App.tsx
-│   ├── index.css
-│   └── main.tsx
-│
-├── .gitignore
-├── index.html
-├── package.json
-├── package-lock.json
-├── tailwind.config.js
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
+localStorage
 ```
+
+### Cross-Tab Synchronization
+
+The application uses the:
+
+```text
+BroadcastChannel API
+```
+
+to synchronize changes between browser tabs.
+
+### Backup & Restore
+
+Users can export their application data as JSON and import it later for backup or synchronization.
+
+The project also includes a planned demo-data generator for visualizing historical statistics.
+
+---
+
+## 🛠️ Technology Stack
+
+| Technology           | Purpose                          |
+| -------------------- | -------------------------------- |
+| React                | User interface                   |
+| TypeScript           | Application development          |
+| Vite                 | Development and production build |
+| Tailwind CSS         | Styling                          |
+| Lucide React         | Icons                            |
+| Recharts             | Analytics and charts             |
+| date-fns             | Date handling                    |
+| canvas-confetti      | Celebration effects              |
+| clsx                 | Conditional styling              |
+| tailwind-merge       | Tailwind class management        |
+| Web Audio API        | Sound effects                    |
+| LocalStorage         | Local data persistence           |
+| BroadcastChannel API | Cross-tab synchronization        |
+
+The planned dependency stack is defined in the project implementation plan.
+
+---
+
+## 🏗️ Architecture
+
+The application is structured around reusable React components, centralized state management, utilities, and typed data models.
+
+```text
+src/
+│
+├── components/
+│   ├── Navbar.tsx
+│   ├── HeroQuote.tsx
+│   ├── HabitList.tsx
+│   ├── HabitCard.tsx
+│   ├── HabitModal.tsx
+│   ├── YearHeatmap.tsx
+│   ├── Dashboard.tsx
+│   ├── ReflectionModal.tsx
+│   ├── BackgroundSelector.tsx
+│   └── DataSyncModal.tsx
+│
+├── context/
+│   └── HabitContext.tsx
+│
+├── types/
+│   └── index.ts
+│
+└── utils/
+    ├── storage.ts
+    ├── sound.ts
+    ├── quotes.ts
+    └── presets.ts
+```
+
+The implementation plan defines this component and utility architecture to separate UI, state management, persistence, and reusable functionality.
 
 ---
 
@@ -136,49 +242,49 @@ forge-365/
 
 ### Prerequisites
 
-Make sure you have the following installed:
+Make sure you have installed:
 
-* Node.js
+* [Node.js](https://nodejs.org/)
 * npm
 * Git
 
-### 1. Clone the repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/forge-365-discipline-habit-tracker.git
 ```
 
-### 2. Navigate to the project
+### Enter the project
 
 ```bash
 cd forge-365-discipline-habit-tracker
 ```
 
-### 3. Install dependencies
+### Install dependencies
 
 ```bash
 npm install
 ```
 
-### 4. Start the development server
+### Start development server
 
 ```bash
 npm run dev
 ```
 
-The application will be available at:
+The application will normally be available at:
 
 ```text
 http://localhost:5173
 ```
 
-### 5. Build for production
+### Create production build
 
 ```bash
 npm run build
 ```
 
-The production build will be generated inside:
+The production build will be generated in:
 
 ```text
 dist/
@@ -186,125 +292,118 @@ dist/
 
 ---
 
-## 📱 Mobile App
+## 📱 Mobile Application
 
-Forge 365 is currently developed as a React web application.
+Forge 365 is currently structured as a web application and can be packaged for mobile using **Capacitor**.
 
-The next stage of development is to package the application as a native Android application using **Capacitor**.
-
-Planned flow:
+Planned mobile architecture:
 
 ```text
-React + Vite
-     ↓
-Production Build
-     ↓
-Capacitor
-     ↓
-Android
-     ↓
-APK / AAB
+React + TypeScript
+        ↓
+      Vite
+        ↓
+ Production Build
+        ↓
+    Capacitor
+        ↓
+     Android
+        ↓
+    APK / AAB
 ```
 
-This will allow Forge 365 to be installed and used directly on Android devices.
+The mobile version can eventually provide a dedicated Android experience while keeping the existing React application as the core interface.
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Development Roadmap
 
-### Phase 1 — Core Application
+### Phase 1 — Core Habit Tracking
 
-* [x] Daily habit tracking
-* [x] Habit check-ins
+* [x] Habit management
+* [x] Daily habit check-ins
+* [x] Habit categories
+* [x] Daily progress
 * [x] Streak tracking
-* [x] 365-day tracking
-* [x] Habit filtering
-* [x] Search
-* [x] Progress dashboard
+* [x] Time-based filtering
 
-### Phase 2 — Advanced Tracking
+### Phase 2 — Year Tracking
+
+* [x] 365-day journey concept
+* [x] Year progress
+* [x] Daily history
+* [x] Discipline heatmap
+
+### Phase 3 — Analytics & Progression
 
 * [ ] Advanced analytics
-* [ ] More milestone types
-* [ ] Detailed progress reports
-* [ ] Habit completion history
-* [ ] Data export
+* [ ] XP progression
+* [ ] Leveling system
+* [ ] Achievements
+* [ ] Milestones
+* [ ] Extended performance insights
 
-### Phase 3 — Mobile
+### Phase 4 — Data Management
 
-* [ ] Mobile responsive optimization
+* [ ] JSON export
+* [ ] JSON import
+* [ ] Backup management
+* [ ] Demo data generation
+* [ ] Cross-device synchronization
+
+### Phase 5 — Mobile
+
+* [ ] Mobile UI optimization
 * [ ] Android application
-* [ ] Push notifications
+* [ ] App icon
+* [ ] Splash screen
 * [ ] Habit reminders
-* [ ] App icon and splash screen
+* [ ] Push notifications
 
-### Phase 4 — Cloud & Accounts
-
-* [ ] User authentication
-* [ ] Cloud data synchronization
-* [ ] Cross-device support
-* [ ] Backup and restore
+> **Note:** Roadmap items represent planned development and may change as the project evolves.
 
 ---
 
-## 🎯 Project Goals
+## 🧪 Verification
 
-Forge 365 aims to help users:
+The application is intended to be tested for:
 
-* Build consistent habits
-* Develop daily discipline
-* Maintain long-term streaks
-* Track progress over 365 days
-* Identify patterns in their routines
-* Stay accountable to their goals
+* Habit creation and editing
+* Custom quotas and frequencies
+* Habit completion
+* Streak calculations
+* XP updates
+* Historical date switching
+* 365-day heatmap rendering
+* Analytics calculations
+* Cross-tab synchronization
+* JSON export/import
+* Responsive design
+* Sound controls
+
+These verification areas are defined in the project's implementation plan.
 
 ---
 
-## 🔐 Data & Privacy
+## 🎯 Project Vision
 
-The application is designed with user data privacy in mind.
+Forge 365 is more than a simple checklist.
 
-Future cloud functionality will include secure authentication, protected user data, and controlled synchronization across devices.
+The long-term goal is to create a system where daily actions become measurable progress across an entire year.
 
----
-
-## 🤝 Contributing
-
-Contributions, suggestions, and improvements are welcome.
-
-### Contribution workflow
-
-```bash
-git clone <repository-url>
-
-cd forge-365-discipline-habit-tracker
-
-npm install
-
-git checkout -b feature/your-feature
-
-npm run dev
+```text
+Daily Action
+     ↓
+Habit Completion
+     ↓
+Consistency
+     ↓
+Streak
+     ↓
+XP & Progress
+     ↓
+365-Day Discipline
 ```
-
-After making your changes:
-
-```bash
-git add .
-
-git commit -m "Add: your feature"
-
-git push origin feature/your-feature
-```
-
-Then open a Pull Request on GitHub.
-
----
-
-## 📌 Project Status
-
-**Status:** 🚧 Active Development
-
-Forge 365 is currently under active development, with the core habit tracking experience implemented and mobile application support planned.
 
 ---
 
@@ -312,14 +411,23 @@ Forge 365 is currently under active development, with the core habit tracking ex
 
 **Sai Preetham**
 
-Computer Science Engineering — Data Science
+B.Tech — Computer Science Engineering
+Specialization: Data Science
+
+---
+
+## 📌 Project Status
+
+**🚧 Active Development**
+
+Forge 365 is an actively developed discipline and habit tracking application. The core experience is being developed around daily habit execution, yearly progress visualization, analytics, and long-term consistency.
 
 ---
 
 ## ⭐ Support
 
-If you find Forge 365 useful, consider giving the repository a ⭐ on GitHub.
+If you find the project interesting, consider giving the repository a ⭐ on GitHub.
 
 ---
 
-> **"Discipline is choosing between what you want now and what you want most."**
+> **Forge the person you want to become — one disciplined day at a time.**
