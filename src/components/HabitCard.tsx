@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Habit, HabitLogEntry } from '../types';
 import { useHabits } from '../context/HabitContext';
+import { formatTime12h } from '../utils/notifications';
 import { 
   Check, 
   Flame, 
@@ -25,7 +26,10 @@ import {
   Activity, 
   Clock,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Bell,
+  Target,
+  Calendar
 } from 'lucide-react';
 
 interface HabitCardProps {
@@ -53,9 +57,12 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Sparkles
 };
 
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 export const HabitCard: React.FC<HabitCardProps> = ({ habit, onEdit, index, totalHabits }) => {
   const { 
     selectedDate, 
+    goals,
     getHabitStatusForDate, 
     toggleHabitCompletion, 
     updateHabitValue, 
@@ -69,6 +76,8 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onEdit, index, tota
   const isCompleted = logEntry?.completed ?? false;
   const currentValue = logEntry?.currentValue ?? (isCompleted ? (habit.targetValue || 1) : 0);
   const streak = getStreakForHabit(habit.id);
+
+  const linkedGoal = goals.find(g => g.id === habit.goalId);
 
   const IconComponent = ICON_MAP[habit.icon] || Flame;
 
@@ -100,6 +109,18 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onEdit, index, tota
 
   const catStyle = categoryColors[habit.category] || categoryColors.mind;
 
+  // Custom Day summary label
+  const getFrequencyLabel = () => {
+    if (habit.frequency === 'daily') return 'Daily (365d)';
+    if (habit.frequency === 'weekdays') return 'Weekdays (Mon-Fri)';
+    if (habit.frequency === 'weekends') return 'Weekends (Sat-Sun)';
+    if (habit.frequency === 'custom_days' && Array.isArray(habit.customDays)) {
+      if (habit.customDays.length === 7) return 'Daily';
+      return habit.customDays.map(d => DAY_NAMES[d]).join(', ');
+    }
+    return 'Scheduled';
+  };
+
   return (
     <div 
       className={`group relative rounded-2xl border transition-all duration-300 backdrop-blur-xl ${
@@ -111,11 +132,11 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onEdit, index, tota
       <div className="p-5 sm:p-6">
         
         {/* Top Header Row */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-start justify-between gap-3 mb-2">
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-start space-x-3">
             <div 
-              className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-105 ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-105 mt-0.5 ${
                 isCompleted 
                   ? 'bg-crimson text-white border-crimson-glow shadow-glow-crimson'
                   : 'bg-obsidian-950 text-slate-300 border-white/10'
@@ -125,16 +146,35 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onEdit, index, tota
             </div>
 
             <div>
-              <div className="flex items-center space-x-2">
+              {/* Category, Time of Day, Reminders & Goal Tags */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-1">
                 <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}>
                   {habit.category}
                 </span>
-                <span className="text-[11px] font-mono text-slate-400 flex items-center space-x-1">
+
+                <span className="text-[10px] font-mono text-slate-400 flex items-center space-x-1 px-1.5 py-0.5 rounded bg-white/5 border border-white/5">
                   <Clock className="w-3 h-3" />
                   <span className="capitalize">{habit.timeOfDay}</span>
                 </span>
+
+                {/* Reminder Time Tag */}
+                {habit.reminderTime && (
+                  <span className="text-[10px] font-mono text-amber-300 flex items-center space-x-1 px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30">
+                    <Bell className="w-3 h-3" />
+                    <span>{formatTime12h(habit.reminderTime)}</span>
+                  </span>
+                )}
+
+                {/* Linked Goal Tag */}
+                {linkedGoal && (
+                  <span className="text-[10px] font-mono text-gold flex items-center space-x-1 px-1.5 py-0.5 rounded bg-gold/15 border border-gold/30 truncate max-w-[140px]">
+                    <Target className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate">{linkedGoal.title}</span>
+                  </span>
+                )}
               </div>
-              <h3 className={`text-base sm:text-lg font-bold font-sans mt-1 transition-colors ${
+
+              <h3 className={`text-base sm:text-lg font-bold font-sans transition-colors ${
                 isCompleted ? 'text-white line-through decoration-crimson/70' : 'text-slate-100'
               }`}>
                 {habit.title}
@@ -213,16 +253,21 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onEdit, index, tota
           </div>
         </div>
 
-        {/* Description */}
+        {/* Schedule & Description */}
+        <div className="flex items-center space-x-1.5 text-[11px] font-mono text-slate-500 mb-2">
+          <Calendar className="w-3 h-3 text-slate-400" />
+          <span>{getFrequencyLabel()}</span>
+        </div>
+
         {habit.description && (
-          <p className="text-xs text-slate-400 font-sans line-clamp-2 mb-4">
+          <p className="text-xs text-slate-400 font-sans line-clamp-2 mb-3">
             {habit.description}
           </p>
         )}
 
         {/* Numeric / Quantitative Tracker Bar */}
         {habit.type === 'numeric' && habit.targetValue && (
-          <div className="my-4 p-3 rounded-xl bg-obsidian-950/60 border border-white/5 space-y-2">
+          <div className="my-3 p-3 rounded-xl bg-obsidian-950/60 border border-white/5 space-y-2">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-slate-400">Progress:</span>
               <span className="text-white font-bold">

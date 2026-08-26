@@ -3,6 +3,9 @@ import { HabitProvider, useHabits } from './context/HabitContext';
 import { Navbar } from './components/Navbar';
 import { HeroQuote } from './components/HeroQuote';
 import { HabitList } from './components/HabitList';
+import { GoalsSection } from './components/GoalsSection';
+import { ChallengesSection } from './components/ChallengesSection';
+import { HistoricalInsightsView } from './components/HistoricalInsightsView';
 import { YearHeatmap } from './components/YearHeatmap';
 import { Dashboard } from './components/Dashboard';
 import { MilestoneView } from './components/MilestoneView';
@@ -11,17 +14,19 @@ import { HabitPacksModal } from './components/HabitPacksModal';
 import { ReflectionModal } from './components/ReflectionModal';
 import { BackgroundSelector } from './components/BackgroundSelector';
 import { DataSyncModal } from './components/DataSyncModal';
+import { InAppReminderToast } from './components/InAppReminderToast';
 import { getWallpaperById } from './utils/wallpapers';
 import type { Habit } from './types';
 import { Flame } from 'lucide-react';
 
 const MainApp: React.FC = () => {
   const { profile } = useHabits();
-  const [activeTab, setActiveTab] = useState<'habits' | 'heatmap' | 'analytics' | 'milestones'>('habits');
+  const [activeTab, setActiveTab] = useState<'habits' | 'goals' | 'challenges' | 'insights' | 'heatmap' | 'analytics' | 'milestones'>('habits');
   
   // Modal States
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [defaultGoalIdForNewHabit, setDefaultGoalIdForNewHabit] = useState<string | undefined>(undefined);
   const [isHabitPacksOpen, setIsHabitPacksOpen] = useState(false);
   const [isReflectionOpen, setIsReflectionOpen] = useState(false);
   const [isWallpaperOpen, setIsWallpaperOpen] = useState(false);
@@ -34,18 +39,20 @@ const MainApp: React.FC = () => {
 
   const handleEditHabit = (habit: Habit) => {
     setEditingHabit(habit);
+    setDefaultGoalIdForNewHabit(undefined);
     setIsHabitModalOpen(true);
   };
 
-  const handleOpenNewHabit = () => {
+  const handleOpenNewHabit = (goalId?: string) => {
     setEditingHabit(null);
+    setDefaultGoalIdForNewHabit(goalId);
     setIsHabitModalOpen(true);
   };
 
   return (
     <div className="relative min-h-screen bg-obsidian-950 text-slate-100 flex flex-col selection:bg-crimson selection:text-white">
       
-      {/* Dynamic Cinematic Wallpaper Backdrop with Real-Time Vivid Styles */}
+      {/* Dynamic Cinematic Wallpaper Backdrop */}
       {activeWallpaper.url && (
         <div 
           className="fixed inset-0 pointer-events-none -z-20 bg-cover bg-center bg-no-repeat transition-all duration-500"
@@ -58,7 +65,7 @@ const MainApp: React.FC = () => {
         />
       )}
 
-      {/* Cinematic Dark Gradient & Vignette (Tuned to preserve photo visibility while maintaining high text readability) */}
+      {/* Cinematic Dark Gradient & Vignette */}
       <div className="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-b from-obsidian-950/70 via-obsidian-950/85 to-obsidian-950/95" />
       <div className="fixed inset-0 pointer-events-none -z-10 cinematic-vignette opacity-80" />
 
@@ -66,7 +73,7 @@ const MainApp: React.FC = () => {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenNewHabit={handleOpenNewHabit}
+        onOpenNewHabit={() => handleOpenNewHabit()}
         onOpenHabitPacks={() => setIsHabitPacksOpen(true)}
         onOpenSync={() => setIsSyncOpen(true)}
         onOpenWallpaper={() => setIsWallpaperOpen(true)}
@@ -82,11 +89,25 @@ const MainApp: React.FC = () => {
         {/* Dynamic Tab Views */}
         {activeTab === 'habits' && (
           <HabitList
-            onOpenNewHabit={handleOpenNewHabit}
+            onOpenNewHabit={() => handleOpenNewHabit()}
             onOpenHabitPacks={() => setIsHabitPacksOpen(true)}
             onOpenReflection={() => setIsReflectionOpen(true)}
             onEditHabit={handleEditHabit}
           />
+        )}
+
+        {activeTab === 'goals' && (
+          <GoalsSection
+            onOpenNewHabitForGoal={(goalId) => handleOpenNewHabit(goalId)}
+          />
+        )}
+
+        {activeTab === 'challenges' && (
+          <ChallengesSection />
+        )}
+
+        {activeTab === 'insights' && (
+          <HistoricalInsightsView />
         )}
 
         {activeTab === 'heatmap' && (
@@ -102,6 +123,9 @@ const MainApp: React.FC = () => {
         )}
 
       </main>
+
+      {/* In-App Timed Habit Reminder Banner Toast */}
+      <InAppReminderToast />
 
       {/* Cinematic Minimal Footer */}
       <footer className="border-t border-white/5 py-8 mt-12 bg-obsidian-950/90 text-center text-xs font-mono text-slate-500">
@@ -120,8 +144,9 @@ const MainApp: React.FC = () => {
       {/* Modals */}
       <HabitModal
         isOpen={isHabitModalOpen}
-        onClose={() => { setIsHabitModalOpen(false); setEditingHabit(null); }}
+        onClose={() => { setIsHabitModalOpen(false); setEditingHabit(null); setDefaultGoalIdForNewHabit(undefined); }}
         habitToEdit={editingHabit}
+        defaultGoalId={defaultGoalIdForNewHabit}
       />
 
       <HabitPacksModal

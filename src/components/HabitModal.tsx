@@ -19,13 +19,17 @@ import {
   Activity, 
   Sparkles,
   ArrowUpToLine,
-  ArrowDownToLine
+  ArrowDownToLine,
+  Bell,
+  Calendar,
+  Target
 } from 'lucide-react';
 
 interface HabitModalProps {
   isOpen: boolean;
   onClose: () => void;
   habitToEdit?: Habit | null;
+  defaultGoalId?: string;
 }
 
 const AVAILABLE_ICONS = [
@@ -46,20 +50,33 @@ const AVAILABLE_ICONS = [
   { name: 'Sparkles', icon: Sparkles }
 ];
 
-export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitToEdit }) => {
-  const { addHabit, updateHabit } = useHabits();
+const DAYS_OF_WEEK = [
+  { label: 'Sun', day: 0 },
+  { label: 'Mon', day: 1 },
+  { label: 'Tue', day: 2 },
+  { label: 'Wed', day: 3 },
+  { label: 'Thu', day: 4 },
+  { label: 'Fri', day: 5 },
+  { label: 'Sat', day: 6 }
+];
+
+export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitToEdit, defaultGoalId }) => {
+  const { addHabit, updateHabit, goals } = useHabits();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<HabitCategory>('mind');
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('morning');
   const [frequency, setFrequency] = useState<HabitFrequency>('daily');
+  const [customDays, setCustomDays] = useState<number[]>([1, 2, 3, 4, 5]); // Default Mon-Fri
   const [type, setType] = useState<HabitType>('boolean');
   const [targetValue, setTargetValue] = useState<number>(20);
   const [unit, setUnit] = useState('mins');
   const [icon, setIcon] = useState('Flame');
   const [priority, setPriority] = useState<HabitPriority>('high');
   const [placement, setPlacement] = useState<'top' | 'bottom'>('top');
+  const [reminderTime, setReminderTime] = useState<string>('');
+  const [goalId, setGoalId] = useState<string>(defaultGoalId || '');
 
   useEffect(() => {
     if (habitToEdit) {
@@ -68,27 +85,39 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
       setCategory(habitToEdit.category);
       setTimeOfDay(habitToEdit.timeOfDay);
       setFrequency(habitToEdit.frequency);
+      setCustomDays(habitToEdit.customDays || [1, 2, 3, 4, 5]);
       setType(habitToEdit.type);
       setTargetValue(habitToEdit.targetValue || 20);
       setUnit(habitToEdit.unit || 'mins');
       setIcon(habitToEdit.icon);
       setPriority(habitToEdit.priority);
+      setReminderTime(habitToEdit.reminderTime || '');
+      setGoalId(habitToEdit.goalId || '');
     } else {
       setTitle('');
       setDescription('');
       setCategory('mind');
       setTimeOfDay('morning');
       setFrequency('daily');
+      setCustomDays([1, 2, 3, 4, 5]);
       setType('boolean');
       setTargetValue(20);
       setUnit('mins');
       setIcon('Flame');
       setPriority('high');
       setPlacement('top');
+      setReminderTime('');
+      setGoalId(defaultGoalId || '');
     }
-  }, [habitToEdit, isOpen]);
+  }, [habitToEdit, isOpen, defaultGoalId]);
 
   if (!isOpen) return null;
+
+  const toggleDay = (day: number) => {
+    setCustomDays(prev => 
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day].sort()
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,11 +131,14 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
         category,
         timeOfDay,
         frequency,
+        customDays: frequency === 'custom_days' ? customDays : undefined,
         type,
         targetValue: type === 'numeric' ? Number(targetValue) : undefined,
         unit: type === 'numeric' ? unit.trim() : undefined,
         icon,
-        priority
+        priority,
+        reminderTime: reminderTime.trim() || undefined,
+        goalId: goalId.trim() || undefined
       });
     } else {
       addHabit({
@@ -115,12 +147,15 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
         category,
         timeOfDay,
         frequency,
+        customDays: frequency === 'custom_days' ? customDays : undefined,
         type,
         targetValue: type === 'numeric' ? Number(targetValue) : undefined,
         unit: type === 'numeric' ? unit.trim() : undefined,
         icon,
         color: '#E63946',
-        priority
+        priority,
+        reminderTime: reminderTime.trim() || undefined,
+        goalId: goalId.trim() || undefined
       }, placement);
     }
     onClose();
@@ -128,7 +163,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl bg-obsidian-900 border border-white/15 shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-xl rounded-2xl bg-obsidian-900 border border-white/15 shadow-2xl overflow-hidden">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
@@ -147,7 +182,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
           
           {/* Title */}
           <div>
@@ -157,7 +192,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
             <input
               type="text"
               required
-              placeholder="e.g. 100 Daily Pushups, Deep Reading"
+              placeholder="e.g. Spartan Strength Session, 100 Pages Deep Reading"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson"
@@ -176,6 +211,148 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson"
             />
+          </div>
+
+          {/* Day Scheduling (Frequency & Rest Days) */}
+          <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/10 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono uppercase text-slate-300 font-bold flex items-center space-x-1.5">
+                <Calendar className="w-3.5 h-3.5 text-crimson" />
+                <span>Schedule & Rest Days</span>
+              </label>
+              <span className="text-[11px] font-mono text-slate-400">
+                Excluded days will not penalize streaks
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => setFrequency('daily')}
+                className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all ${
+                  frequency === 'daily' 
+                    ? 'bg-crimson text-white border-crimson shadow-glow-crimson font-bold' 
+                    : 'bg-obsidian-900 text-slate-400 border-white/5 hover:border-white/20'
+                }`}
+              >
+                Every Day (365d)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFrequency('weekdays')}
+                className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all ${
+                  frequency === 'weekdays' 
+                    ? 'bg-crimson text-white border-crimson shadow-glow-crimson font-bold' 
+                    : 'bg-obsidian-900 text-slate-400 border-white/5 hover:border-white/20'
+                }`}
+              >
+                Weekdays (M-F)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFrequency('weekends')}
+                className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all ${
+                  frequency === 'weekends' 
+                    ? 'bg-crimson text-white border-crimson shadow-glow-crimson font-bold' 
+                    : 'bg-obsidian-900 text-slate-400 border-white/5 hover:border-white/20'
+                }`}
+              >
+                Weekends (Sat-Sun)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFrequency('custom_days')}
+                className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all ${
+                  frequency === 'custom_days' 
+                    ? 'bg-gold text-obsidian-950 border-gold shadow-glow-gold font-bold' 
+                    : 'bg-obsidian-900 text-slate-400 border-white/5 hover:border-white/20'
+                }`}
+              >
+                Specific Days
+              </button>
+            </div>
+
+            {/* Custom Day Toggles */}
+            {frequency === 'custom_days' && (
+              <div className="pt-2 border-t border-white/5 space-y-1.5 animate-fade-in">
+                <div className="text-[11px] font-mono text-slate-400">
+                  Select the exact days this habit must be performed:
+                </div>
+                <div className="flex gap-1.5 justify-between">
+                  {DAYS_OF_WEEK.map(({ label, day }) => {
+                    const isSelected = customDays.includes(day);
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => toggleDay(day)}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all ${
+                          isSelected
+                            ? 'bg-crimson text-white border-crimson shadow-glow-crimson'
+                            : 'bg-obsidian-900 text-slate-500 border-white/5 hover:text-slate-300'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Reminder Time & Grand Goal Binding */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            {/* Reminder Time Picker */}
+            <div>
+              <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold flex items-center space-x-1.5">
+                <Bell className="w-3.5 h-3.5 text-amber-400" />
+                <span>Timed Reminder (Optional)</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-400"
+                />
+                {reminderTime && (
+                  <button
+                    type="button"
+                    onClick={() => setReminderTime('')}
+                    className="px-2.5 py-2 rounded-xl bg-obsidian-950 text-slate-400 hover:text-crimson border border-white/10 text-xs"
+                    title="Clear timing"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Link to Grand Objective */}
+            <div>
+              <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold flex items-center space-x-1.5">
+                <Target className="w-3.5 h-3.5 text-gold" />
+                <span>Attach to Grand Goal</span>
+              </label>
+              <select
+                value={goalId}
+                onChange={(e) => setGoalId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-gold"
+              >
+                <option value="">No goal attached (Independent)</option>
+                {goals.map(g => (
+                  <option key={g.id} value={g.id}>
+                    🎯 {g.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
           </div>
 
           {/* Placement in List (Only for New Habits) */}
@@ -267,16 +444,16 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
 
             <div>
               <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold">
-                Frequency
+                Priority
               </label>
               <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value as HabitFrequency)}
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as HabitPriority)}
                 className="w-full px-3 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-crimson"
               >
-                <option value="daily">Every Day (365 Days)</option>
-                <option value="weekdays">Weekdays Only</option>
-                <option value="weekends">Weekends Only</option>
+                <option value="high">High Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="normal">Normal</option>
               </select>
             </div>
           </div>

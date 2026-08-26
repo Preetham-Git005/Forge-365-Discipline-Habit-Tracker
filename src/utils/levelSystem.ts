@@ -21,16 +21,17 @@ const LEVEL_TITLES: { minLevel: number; title: string }[] = [
 ];
 
 export const getTitleForLevel = (level: number): string => {
+  const safeLevel = isNaN(Number(level)) ? 1 : Number(level);
   for (let i = LEVEL_TITLES.length - 1; i >= 0; i--) {
-    if (level >= LEVEL_TITLES[i].minLevel) {
+    if (safeLevel >= LEVEL_TITLES[i].minLevel) {
       return LEVEL_TITLES[i].title;
     }
   }
   return LEVEL_TITLES[0].title;
 };
 
-export const calculateLevelInfo = (xp: number): LevelInfo => {
-  // Level curve: XP = 150 * (level ^ 1.45)
+export const calculateLevelInfo = (rawXp: number = 0): LevelInfo => {
+  const xp = isNaN(Number(rawXp)) ? 0 : Math.max(0, Number(rawXp));
   let level = 1;
   let prevThreshold = 0;
   let nextThreshold = 200;
@@ -50,7 +51,7 @@ export const calculateLevelInfo = (xp: number): LevelInfo => {
     title: getTitleForLevel(level),
     minXp: prevThreshold,
     maxXp: nextThreshold,
-    progressPercent: Math.round(progressPercent)
+    progressPercent: Math.round(progressPercent) || 0
   };
 };
 

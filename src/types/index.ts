@@ -11,7 +11,7 @@ export interface Habit {
   category: HabitCategory;
   timeOfDay: TimeOfDay;
   frequency: HabitFrequency;
-  customDays?: number[]; // 0 = Sun, 1 = Mon ... 6 = Sat
+  customDays?: number[]; // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
   type: HabitType;
   targetValue?: number;
   unit?: string;
@@ -21,6 +21,8 @@ export interface Habit {
   archived?: boolean;
   priority: HabitPriority;
   order?: number;
+  reminderTime?: string; // "HH:mm" in 24h format, e.g. "05:00", "18:30"
+  goalId?: string; // ID of the linked Grand Goal / Objective
 }
 
 export interface HabitLogEntry {
@@ -42,6 +44,69 @@ export interface DailyReflection {
   loggedAt: string;
 }
 
+export type GoalType = 'progressive' | 'milestone';
+
+export interface Goal {
+  id: string;
+  title: string;
+  description?: string;
+  type: GoalType; // 'progressive' = habit tracked, 'milestone' = check / uncheck single milestone
+  completed?: boolean; // For milestone goals
+  completedAt?: string;
+  targetDate?: string; // 'YYYY-MM-DD'
+  category: HabitCategory;
+  status: 'in_progress' | 'achieved' | 'archived';
+  color: string;
+  icon: string;
+  linkedHabitIds: string[];
+  createdAt: string;
+}
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  type: 'weekly' | 'monthly';
+  category: HabitCategory;
+  targetCount: number; // e.g. 7, 30
+  unit: string; // e.g. "Days", "Workouts", "Sessions"
+  rewardXp: number;
+  color: string;
+  icon: string;
+  linkedHabitId?: string;
+  startDate: string; // 'YYYY-MM-DD'
+  endDate: string; // 'YYYY-MM-DD'
+  status: 'active' | 'completed' | 'failed';
+  completedAt?: string;
+  createdAt: string;
+}
+
+export interface PersonalRule {
+  id: string;
+  rule: string;
+  category?: string;
+  createdAt: string;
+  active: boolean;
+  order?: number;
+}
+
+export interface DailyTask {
+  id: string;
+  title: string;
+  date: string; // Target execution date 'YYYY-MM-DD'
+  completed: boolean;
+  priority: 'high' | 'medium' | 'normal';
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface DailyInsight {
+  id: string;
+  date: string; // 'YYYY-MM-DD'
+  content: string;
+  createdAt: string;
+}
+
 export interface UserProfile {
   name: string;
   title: string;
@@ -56,6 +121,7 @@ export interface UserProfile {
   wallpaperBlur?: number; // 0 to 12 (px)
   wallpaperGrayscale?: boolean; // true = monochrome noir, false = cinematic color
   customWallpaperUrl?: string;
+  notificationsEnabled?: boolean;
 }
 
 export interface Milestone {
