@@ -25,6 +25,7 @@ export const BattlePlanWidget: React.FC = () => {
   } = useHabits();
 
   const [activeTab, setActiveTab] = useState<'today_tasks' | 'tomorrow_planner' | 'insights'>('today_tasks');
+  const [isExpanded, setIsExpanded] = useState(true);
   const [taskInput, setTaskInput] = useState('');
   const [taskPriority, setTaskPriority] = useState<'high' | 'medium' | 'normal'>('high');
   
@@ -37,6 +38,8 @@ export const BattlePlanWidget: React.FC = () => {
   const tomorrowStr = getTomorrowDateString();
   const tomorrowTasks = getTasksForDate(tomorrowStr) || [];
   const todayInsights = getInsightsForDate(selectedDate) || [];
+
+  const pendingTodayTasksCount = todayTasks.filter(t => !t.completed).length;
 
   const handleAddTodayTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,66 +67,101 @@ export const BattlePlanWidget: React.FC = () => {
       
       {/* Top Header Row & Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
-        <div className="flex items-center space-x-3">
+        <div 
+          className="flex items-center space-x-3 cursor-pointer select-none"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
           <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
             <Target className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-cinematic text-sm sm:text-base font-bold text-white tracking-wide">
-              Strategic Battle Plan & Insights
-            </h3>
+            <div className="flex items-center space-x-2">
+              <h3 className="font-cinematic text-sm sm:text-base font-bold text-white tracking-wide">
+                Strategic Battle Plan & Insights
+              </h3>
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-300 border border-white/10">
+                {pendingTodayTasksCount} Pending • {tomorrowTasks.length} Planned Tomorrow
+              </span>
+            </div>
             <p className="text-[11px] text-slate-400 font-mono">
               Action items for {formatDateDisplay(selectedDate)}
             </p>
           </div>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex items-center space-x-1 p-1 rounded-xl bg-obsidian-950 border border-white/10 text-xs font-mono">
-          <button
-            type="button"
-            onClick={() => setActiveTab('today_tasks')}
-            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1.5 ${
-              activeTab === 'today_tasks' 
-                ? 'bg-crimson text-white font-bold shadow-glow-crimson' 
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <span>Action Tasks</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40">
-              {todayTasks.filter(t => !t.completed).length}
-            </span>
-          </button>
+        <div className="flex items-center space-x-2">
+          {/* Tab Switcher (Only when expanded) */}
+          {isExpanded && (
+            <div className="flex items-center space-x-1 p-1 rounded-xl bg-obsidian-950 border border-white/10 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => setActiveTab('today_tasks')}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1.5 ${
+                  activeTab === 'today_tasks' 
+                    ? 'bg-crimson text-white font-bold shadow-glow-crimson' 
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span>Action Tasks</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40">
+                  {pendingTodayTasksCount}
+                </span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('tomorrow_planner')}
-            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1.5 ${
-              activeTab === 'tomorrow_planner' 
-                ? 'bg-gold text-obsidian-950 font-bold shadow-glow-gold' 
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <span>Plan Tomorrow</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40 text-white">
-              {tomorrowTasks.length}
-            </span>
-          </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('tomorrow_planner')}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1.5 ${
+                  activeTab === 'tomorrow_planner' 
+                    ? 'bg-gold text-obsidian-950 font-bold shadow-glow-gold' 
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span>Plan Tomorrow</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40 text-white">
+                  {tomorrowTasks.length}
+                </span>
+              </button>
 
+              <button
+                type="button"
+                onClick={() => setActiveTab('insights')}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1.5 ${
+                  activeTab === 'insights' 
+                    ? 'bg-cyan-500 text-obsidian-950 font-bold shadow-glow-cyan' 
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Lightbulb className="w-3 h-3" />
+                <span>Insights ({todayInsights.length})</span>
+              </button>
+            </div>
+          )}
+
+          {/* Compress / Expand Button */}
           <button
             type="button"
-            onClick={() => setActiveTab('insights')}
-            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1.5 ${
-              activeTab === 'insights' 
-                ? 'bg-cyan-500 text-obsidian-950 font-bold shadow-glow-cyan' 
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors border border-white/10"
+            title={isExpanded ? 'Compress Section' : 'Expand Section'}
           >
-            <Lightbulb className="w-3 h-3" />
-            <span>Insights ({todayInsights.length})</span>
+            {isExpanded ? (
+              <span className="text-xs font-mono px-1 flex items-center space-x-1">
+                <span>Compress</span>
+                <span className="text-sm">▲</span>
+              </span>
+            ) : (
+              <span className="text-xs font-mono px-1 flex items-center space-x-1 text-gold">
+                <span>Expand</span>
+                <span className="text-sm">▼</span>
+              </span>
+            )}
           </button>
         </div>
       </div>
+
+      {isExpanded && (
+        <>
 
       {/* Tab 1: Today's Action Tasks */}
       {activeTab === 'today_tasks' && (
@@ -336,6 +374,9 @@ export const BattlePlanWidget: React.FC = () => {
           )}
 
         </div>
+      )}
+
+        </>
       )}
 
     </div>

@@ -74,6 +74,7 @@ export interface Challenge {
   color: string;
   icon: string;
   linkedHabitId?: string;
+  linkedHabitIds?: string[];
   startDate: string; // 'YYYY-MM-DD'
   endDate: string; // 'YYYY-MM-DD'
   status: 'active' | 'completed' | 'failed';

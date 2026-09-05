@@ -26,10 +26,10 @@ import {
 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
-  const { habits, logs, reflections, levelInfo, getCategoryStats, getStreakForHabit } = useHabits();
+  const { habits, logs, reflections, levelInfo, getCategoryStats, getStreakForHabit, isHabitScheduledForDate } = useHabits();
   const [timeRange, setTimeRange] = useState<7 | 14 | 30>(14);
 
-  const activeHabits = useMemo(() => habits.filter(h => !h.archived), [habits]);
+  const activeHabits = useMemo(() => (habits || []).filter(h => !h.archived), [habits]);
 
   // Completion Trend Data for Recharts AreaChart
   const trendData = useMemo(() => {
@@ -44,23 +44,26 @@ export const Dashboard: React.FC = () => {
       const day = String(d.getDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
 
-      const completed = logs.filter(
-        l => l.date === dateStr && l.completed && activeHabits.some(h => h.id === l.habitId)
+      const scheduledOnDate = activeHabits.filter(h => isHabitScheduledForDate(h, dateStr));
+      const completed = (logs || []).filter(
+        l => l.date === dateStr && l.completed && scheduledOnDate.some(h => h.id === l.habitId)
       ).length;
 
-      const rate = activeHabits.length > 0 ? Math.round((completed / activeHabits.length) * 100) : 0;
+      const rate = scheduledOnDate.length > 0 
+        ? Math.min(100, Math.round((completed / scheduledOnDate.length) * 100)) 
+        : (activeHabits.length === 0 ? 0 : 100);
 
       data.push({
         dateStr,
         label: d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
         completionRate: rate,
         completedCount: completed,
-        total: activeHabits.length
+        total: scheduledOnDate.length
       });
     }
 
     return data;
-  }, [timeRange, logs, activeHabits]);
+  }, [timeRange, logs, activeHabits, isHabitScheduledForDate]);
 
   // Category Radar Chart Data
   const categoryData = useMemo(() => {

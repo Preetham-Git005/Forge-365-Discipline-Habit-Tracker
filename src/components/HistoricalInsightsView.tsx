@@ -16,22 +16,22 @@ import {
 } from 'lucide-react';
 
 export const HistoricalInsightsView: React.FC = () => {
-  const { habits, logs, reflections, profile } = useHabits();
+  const { habits, logs, reflections, profile, isHabitScheduledForDate } = useHabits();
   const [timeframe, setTimeframe] = useState<'weekly' | 'monthly' | 'yearly'>('weekly');
 
   const weeklyReport = useMemo(() => 
-    generateWeeklyInsights(habits, logs, reflections),
-    [habits, logs, reflections]
+    generateWeeklyInsights(habits, logs, reflections, isHabitScheduledForDate),
+    [habits, logs, reflections, isHabitScheduledForDate]
   );
 
   const monthlyReport = useMemo(() => 
-    generateMonthlyInsights(habits, logs, reflections),
-    [habits, logs, reflections]
+    generateMonthlyInsights(habits, logs, reflections, isHabitScheduledForDate),
+    [habits, logs, reflections, isHabitScheduledForDate]
   );
 
   const yearlyReport = useMemo(() => 
-    generateYearlyInsights(profile, habits, logs),
-    [profile, habits, logs]
+    generateYearlyInsights(profile, habits, logs, isHabitScheduledForDate),
+    [profile, habits, logs, isHabitScheduledForDate]
   );
 
   return (
@@ -103,10 +103,10 @@ export const HistoricalInsightsView: React.FC = () => {
                 <span>7-Day Volume</span>
                 <Flame className="w-4 h-4 text-crimson" />
               </div>
-              <div className="text-3xl font-extrabold font-mono text-white mt-2">
-                {weeklyReport.totalCompletions}
+              <div className="text-2xl sm:text-3xl font-extrabold font-mono text-white mt-2">
+                {weeklyReport.totalCompletions} <span className="text-sm font-normal text-slate-500">/ {weeklyReport.totalScheduled}</span>
               </div>
-              <p className="text-[11px] text-slate-500 font-mono mt-1">Check-ins recorded</p>
+              <p className="text-[11px] text-slate-500 font-mono mt-1">Scheduled check-ins executed</p>
             </div>
 
             <div className="p-5 rounded-2xl bg-obsidian-900/80 border border-white/10 shadow-obsidian-card">
@@ -220,10 +220,10 @@ export const HistoricalInsightsView: React.FC = () => {
 
             <div className="p-6 rounded-2xl bg-obsidian-900/80 border border-white/10 shadow-obsidian-card">
               <span className="text-xs font-mono uppercase text-slate-400">Total Check-Ins</span>
-              <div className="text-3xl font-extrabold font-mono text-white mt-1">
-                {monthlyReport.totalCompletions}
+              <div className="text-2xl sm:text-3xl font-extrabold font-mono text-white mt-1">
+                {monthlyReport.totalCompletions} <span className="text-sm font-normal text-slate-500">/ {monthlyReport.totalScheduled}</span>
               </div>
-              <p className="text-xs text-slate-500 font-mono mt-1">Across 30 days</p>
+              <p className="text-xs text-slate-500 font-mono mt-1">Across 30 days of scheduled habits</p>
             </div>
 
             <div className="p-6 rounded-2xl bg-obsidian-900/80 border border-white/10 shadow-obsidian-card">

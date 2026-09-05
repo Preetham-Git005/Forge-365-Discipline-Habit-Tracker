@@ -325,7 +325,22 @@ export const storage = {
         return DEFAULT_INITIAL_CHALLENGES;
       }
       const parsed = JSON.parse(data);
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_INITIAL_CHALLENGES;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        this.saveChallenges(DEFAULT_INITIAL_CHALLENGES);
+        return DEFAULT_INITIAL_CHALLENGES;
+      }
+      return parsed.map(c => {
+        let habitIds: string[] = [];
+        if (Array.isArray(c.linkedHabitIds)) {
+          habitIds = c.linkedHabitIds;
+        } else if (c.linkedHabitId) {
+          habitIds = [c.linkedHabitId];
+        }
+        return {
+          ...c,
+          linkedHabitIds: habitIds
+        };
+      });
     } catch {
       return DEFAULT_INITIAL_CHALLENGES;
     }

@@ -16,7 +16,10 @@ import {
   Zap, 
   Activity, 
   Sparkles,
-  X
+  X,
+  Link2,
+  Layers,
+  Check
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -39,12 +42,15 @@ export const ChallengesSection: React.FC = () => {
     updateChallenge, 
     deleteChallenge, 
     toggleChallengeCompletion, 
+    linkHabitToChallenge,
+    unlinkHabitFromChallenge,
     getChallengeProgress 
   } = useHabits();
 
   const [activeTab, setActiveTab] = useState<'all' | 'weekly' | 'monthly'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
+  const [attachingToChallengeId, setAttachingToChallengeId] = useState<string | null>(null);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -56,7 +62,7 @@ export const ChallengesSection: React.FC = () => {
   const [rewardXp, setRewardXp] = useState<number>(350);
   const [color, setColor] = useState('#E63946');
   const [icon, setIcon] = useState('Dumbbell');
-  const [linkedHabitId, setLinkedHabitId] = useState('');
+  const [selectedHabitIds, setSelectedHabitIds] = useState<string[]>([]);
 
   const openCreateModal = () => {
     setEditingChallenge(null);
@@ -69,7 +75,7 @@ export const ChallengesSection: React.FC = () => {
     setRewardXp(350);
     setColor('#E63946');
     setIcon('Dumbbell');
-    setLinkedHabitId('');
+    setSelectedHabitIds([]);
     setIsModalOpen(true);
   };
 
@@ -84,8 +90,17 @@ export const ChallengesSection: React.FC = () => {
     setRewardXp(c.rewardXp);
     setColor(c.color);
     setIcon(c.icon);
-    setLinkedHabitId(c.linkedHabitId || '');
+    const existingIds = Array.isArray(c.linkedHabitIds) && c.linkedHabitIds.length > 0 
+      ? c.linkedHabitIds 
+      : (c.linkedHabitId ? [c.linkedHabitId] : []);
+    setSelectedHabitIds(existingIds);
     setIsModalOpen(true);
+  };
+
+  const toggleHabitSelection = (habitId: string) => {
+    setSelectedHabitIds(prev => 
+      prev.includes(habitId) ? prev.filter(id => id !== habitId) : [...prev, habitId]
+    );
   };
 
   const handleSave = (e: React.FormEvent) => {
@@ -104,7 +119,8 @@ export const ChallengesSection: React.FC = () => {
         rewardXp: Number(rewardXp),
         color,
         icon,
-        linkedHabitId: linkedHabitId || undefined
+        linkedHabitIds: selectedHabitIds,
+        linkedHabitId: selectedHabitIds[0] || undefined
       });
     } else {
       addChallenge({
@@ -117,7 +133,8 @@ export const ChallengesSection: React.FC = () => {
         rewardXp: Number(rewardXp),
         color,
         icon,
-        linkedHabitId: linkedHabitId || undefined,
+        linkedHabitIds: selectedHabitIds,
+        linkedHabitId: selectedHabitIds[0] || undefined,
         startDate: getTodayDateString(),
         endDate: '2027-12-31',
         status: 'active'
@@ -127,7 +144,7 @@ export const ChallengesSection: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const filteredChallenges = challenges.filter(c => 
+  const filteredChallenges = (challenges || []).filter(c => 
     activeTab === 'all' || c.type === activeTab
   );
 
@@ -144,7 +161,7 @@ export const ChallengesSection: React.FC = () => {
             </h2>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Weekly & Monthly high-intensity discipline sprints for Gymrats and Stoic practitioners.
+            Weekly sprints & Monthly protocols. Attach single or multiple habits to track dedicated conquest!
           </p>
         </div>
 
@@ -194,7 +211,13 @@ export const ChallengesSection: React.FC = () => {
           const progress = getChallengeProgress(challenge.id);
           const IconC = ICON_MAP[challenge.icon] || Dumbbell;
           const isCompleted = challenge.status === 'completed';
-          const linkedHabit = habits.find(h => h.id === challenge.linkedHabitId);
+          
+          const attachedHabitIds = Array.isArray(challenge.linkedHabitIds) && challenge.linkedHabitIds.length > 0
+            ? challenge.linkedHabitIds
+            : (challenge.linkedHabitId ? [challenge.linkedHabitId] : []);
+          
+          const attachedHabits = habits.filter(h => attachedHabitIds.includes(h.id));
+          const unattachedHabits = habits.filter(h => !attachedHabitIds.includes(h.id));
 
           return (
             <div
@@ -243,12 +266,14 @@ export const ChallengesSection: React.FC = () => {
                   <button
                     onClick={() => openEditModal(challenge)}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                    title="Edit Challenge"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => deleteChallenge(challenge.id)}
                     className="p-1.5 rounded-lg text-slate-600 hover:text-crimson hover:bg-crimson/10 transition-colors"
+                    title="Delete Challenge"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -260,18 +285,89 @@ export const ChallengesSection: React.FC = () => {
                 {challenge.description}
               </p>
 
-              {/* Linked Habit */}
-              {linkedHabit && (
-                <div className="flex items-center space-x-2 text-xs font-mono text-slate-400 bg-obsidian-950/60 p-2.5 rounded-xl border border-white/5">
-                  <Flame className="w-3.5 h-3.5 text-crimson" />
-                  <span>Tracking Habit: <strong className="text-slate-200">{linkedHabit.title}</strong></span>
+              {/* Attached Habits Section (Multiple habits support!) */}
+              <div className="space-y-2 p-3 rounded-xl bg-obsidian-950/70 border border-white/5">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-400 flex items-center space-x-1.5">
+                    <Layers className="w-3.5 h-3.5 text-crimson" />
+                    <span>Attached Habits ({attachedHabits.length})</span>
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setAttachingToChallengeId(attachingToChallengeId === challenge.id ? null : challenge.id)}
+                    className="text-[11px] font-mono text-gold hover:text-gold-glow flex items-center space-x-1"
+                  >
+                    <Link2 className="w-3 h-3" />
+                    <span>+ Attach Habit</span>
+                  </button>
                 </div>
-              )}
+
+                {/* Quick Attach Dropdown */}
+                {attachingToChallengeId === challenge.id && (
+                  <div className="p-2.5 rounded-lg bg-obsidian-900 border border-gold/30 space-y-1.5 animate-fade-in mt-2">
+                    <div className="text-[10px] font-mono text-slate-400">
+                      Select habit to add to this challenge protocol:
+                    </div>
+                    {unattachedHabits.length > 0 ? (
+                      <div className="max-h-32 overflow-y-auto space-y-1">
+                        {unattachedHabits.map(h => (
+                          <div 
+                            key={h.id}
+                            className="flex items-center justify-between p-1.5 rounded bg-obsidian-950 border border-white/5 text-xs text-slate-200"
+                          >
+                            <span className="truncate pr-2">{h.title}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                linkHabitToChallenge(challenge.id, h.id);
+                                setAttachingToChallengeId(null);
+                              }}
+                              className="px-2 py-0.5 rounded bg-crimson hover:bg-crimson-glow text-white text-[10px] font-bold"
+                            >
+                              Attach
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-slate-500 italic">All available habits are already attached!</div>
+                    )}
+                  </div>
+                )}
+
+                {/* Chips of attached habits */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {attachedHabits.map(h => (
+                    <div 
+                      key={h.id}
+                      className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-obsidian-900 border border-white/10 text-xs font-mono text-slate-200"
+                    >
+                      <Flame className="w-3 h-3 text-crimson" />
+                      <span>{h.title}</span>
+                      <button
+                        type="button"
+                        onClick={() => unlinkHabitFromChallenge(challenge.id, h.id)}
+                        className="text-slate-500 hover:text-crimson ml-1"
+                        title="Remove habit from challenge"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {attachedHabits.length === 0 && (
+                    <div className="text-[11px] font-mono text-slate-500 italic">
+                      No specific habits attached — any habit execution contributes to progress.
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* Progress & Completion */}
               <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/5 space-y-2">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-slate-400">Challenge Progress</span>
+                  <span className="text-slate-400">Protocol Progress</span>
                   <span className="text-white font-bold">
                     {progress.currentCount} / {progress.targetCount} {challenge.unit} ({progress.percent}%)
                   </span>
@@ -426,23 +522,42 @@ export const ChallengesSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Linked Habit */}
+              {/* Attach Multiple Habits */}
               <div>
-                <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold">
-                  Link Habit (Optional)
+                <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold flex items-center justify-between">
+                  <span>Attach Habits to this Challenge (Multi-Select)</span>
+                  <span className="text-[10px] text-slate-400">{selectedHabitIds.length} attached</span>
                 </label>
-                <select
-                  value={linkedHabitId}
-                  onChange={(e) => setLinkedHabitId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-crimson"
-                >
-                  <option value="">Any habit check-in counts</option>
-                  {habits.map(h => (
-                    <option key={h.id} value={h.id}>
-                      {h.title}
-                    </option>
-                  ))}
-                </select>
+                <div className="p-3 rounded-xl bg-obsidian-950 border border-white/10 max-h-44 overflow-y-auto space-y-1.5">
+                  {habits.map(h => {
+                    const isSelected = selectedHabitIds.includes(h.id);
+                    return (
+                      <button
+                        type="button"
+                        key={h.id}
+                        onClick={() => toggleHabitSelection(h.id)}
+                        className={`w-full flex items-center justify-between p-2 rounded-lg border text-left text-xs font-mono transition-all ${
+                          isSelected
+                            ? 'bg-crimson/20 text-white border-crimson/50 font-bold'
+                            : 'bg-obsidian-900/80 text-slate-400 border-white/5 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2 truncate pr-2">
+                          <Flame className={`w-3.5 h-3.5 ${isSelected ? 'text-crimson' : 'text-slate-600'}`} />
+                          <span className="truncate">{h.title}</span>
+                        </div>
+                        <div className={`w-4 h-4 rounded flex items-center justify-center border ${
+                          isSelected ? 'bg-crimson border-crimson text-white' : 'border-slate-600'
+                        }`}>
+                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                  {habits.length === 0 && (
+                    <div className="text-xs text-slate-500 font-mono py-2 text-center">No habits created yet.</div>
+                  )}
+                </div>
               </div>
 
               <div className="pt-4 border-t border-white/10 flex justify-end space-x-3">

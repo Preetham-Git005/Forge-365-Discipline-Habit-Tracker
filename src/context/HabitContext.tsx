@@ -68,6 +68,8 @@ interface HabitContextType {
   updateChallenge: (challenge: Challenge) => void;
   deleteChallenge: (challengeId: string) => void;
   toggleChallengeCompletion: (challengeId: string) => void;
+  linkHabitToChallenge: (challengeId: string, habitId: string) => void;
+  unlinkHabitFromChallenge: (challengeId: string, habitId: string) => void;
   getChallengeProgress: (challengeId: string) => {
     currentCount: number;
     targetCount: number;
@@ -744,6 +746,44 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     broadcastChange();
   }, [profile.soundEnabled, addXp, broadcastChange]);
 
+  const linkHabitToChallenge = useCallback((challengeId: string, habitId: string) => {
+    setChallenges(prev => {
+      const updated = prev.map(c => {
+        if (c.id === challengeId) {
+          const currentIds = Array.isArray(c.linkedHabitIds) ? c.linkedHabitIds : (c.linkedHabitId ? [c.linkedHabitId] : []);
+          if (!currentIds.includes(habitId)) {
+            return {
+              ...c,
+              linkedHabitIds: [...currentIds, habitId]
+            };
+          }
+        }
+        return c;
+      });
+      storage.saveChallenges(updated);
+      return updated;
+    });
+    broadcastChange();
+  }, [broadcastChange]);
+
+  const unlinkHabitFromChallenge = useCallback((challengeId: string, habitId: string) => {
+    setChallenges(prev => {
+      const updated = prev.map(c => {
+        if (c.id === challengeId) {
+          const currentIds = Array.isArray(c.linkedHabitIds) ? c.linkedHabitIds : (c.linkedHabitId ? [c.linkedHabitId] : []);
+          return {
+            ...c,
+            linkedHabitIds: currentIds.filter(id => id !== habitId)
+          };
+        }
+        return c;
+      });
+      storage.saveChallenges(updated);
+      return updated;
+    });
+    broadcastChange();
+  }, [broadcastChange]);
+
   const getChallengeProgress = useCallback((challengeId: string) => {
     const challenge = challenges.find(c => c.id === challengeId);
     if (!challenge) {
@@ -754,7 +794,10 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return { currentCount: challenge.targetCount, targetCount: challenge.targetCount, percent: 100, isCompleted: true };
     }
 
-    // If challenge is linked to a habit, count habit completions in past N days
+    const linkedIds = Array.isArray(challenge.linkedHabitIds) && challenge.linkedHabitIds.length > 0
+      ? challenge.linkedHabitIds
+      : (challenge.linkedHabitId ? [challenge.linkedHabitId] : []);
+
     let count = 0;
     const daysToScan = challenge.type === 'weekly' ? 7 : 30;
     const today = new Date();
@@ -764,9 +807,20 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       d.setDate(today.getDate() - i);
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-      if (challenge.linkedHabitId) {
-        const done = logs.some(l => l.habitId === challenge.linkedHabitId && l.date === dateStr && l.completed);
-        if (done) count++;
+      if (linkedIds.length > 0) {
+        // Find which linked habits are scheduled on this day
+        const scheduledLinked = habits.filter(h => linkedIds.includes(h.id) && isHabitScheduledForDate(h, dateStr));
+        if (scheduledLinked.length > 0) {
+          // A day counts if ALL scheduled linked habits for that day were done!
+          const allScheduledDone = scheduledLinked.every(h =>
+            logs.some(l => l.habitId === h.id && l.date === dateStr && l.completed)
+          );
+          if (allScheduledDone) count++;
+        } else {
+          // If none specifically scheduled for this day, check if any was completed
+          const anyDone = logs.some(l => linkedIds.includes(l.habitId) && l.date === dateStr && l.completed);
+          if (anyDone) count++;
+        }
       } else {
         // Any habit checkin counts
         const done = logs.some(l => l.date === dateStr && l.completed);
@@ -774,14 +828,14 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    const percent = Math.min(100, Math.round((count / challenge.targetCount) * 100));
+    const percent = Math.min(100, Math.round((count / Math.max(1, challenge.targetCount)) * 100));
     return {
       currentCount: count,
       targetCount: challenge.targetCount,
       percent,
       isCompleted: count >= challenge.targetCount
     };
-  }, [challenges, logs]);
+  }, [challenges, habits, logs, isHabitScheduledForDate]);
 
   // Rules Management
   const addRule = useCallback((ruleText: string, category: string = 'Discipline') => {
@@ -1144,7 +1198,14 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
-    const expectedTotal = Math.max(1, daysElapsed * Math.max(1, activeHabits.length));
+    let totalScheduledElapsed = 0;
+    for (let i = 0; i < daysElapsed; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      totalScheduledElapsed += activeHabits.filter(h => isHabitScheduledForDate(h, dateStr)).length;
+    }
+    const expectedTotal = Math.max(1, totalScheduledElapsed);
     const yearCompletionRate = Math.min(100, Math.round((totalCompletions / expectedTotal) * 100));
 
     let currentOverallStreak = 0;
@@ -1267,6 +1328,8 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateChallenge,
         deleteChallenge,
         toggleChallengeCompletion,
+        linkHabitToChallenge,
+        unlinkHabitFromChallenge,
         getChallengeProgress,
         addRule,
         updateRule,

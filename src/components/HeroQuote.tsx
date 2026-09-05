@@ -6,7 +6,7 @@ import { useHabits } from '../context/HabitContext';
 export const HeroQuote: React.FC = () => {
   const [currentQuote, setCurrentQuote] = useState(getRandomQuote);
   const [isRotating, setIsRotating] = useState(false);
-  const { getYearStats, habits, logs, selectedDate } = useHabits();
+  const { getYearStats, habits, logs, selectedDate, isHabitScheduledForDate } = useHabits();
 
   const nextQuote = () => {
     setIsRotating(true);
@@ -21,11 +21,14 @@ export const HeroQuote: React.FC = () => {
   };
 
   const yearStats = getYearStats();
-  const activeHabits = habits.filter(h => !h.archived);
-  const completedToday = logs.filter(
-    l => l.date === selectedDate && l.completed && activeHabits.some(h => h.id === l.habitId)
+  const activeHabits = (habits || []).filter(h => !h.archived);
+  const scheduledOnDate = activeHabits.filter(h => isHabitScheduledForDate(h, selectedDate));
+  const completedToday = (logs || []).filter(
+    l => l.date === selectedDate && l.completed && scheduledOnDate.some(h => h.id === l.habitId)
   ).length;
-  const completionPercentage = activeHabits.length > 0 ? Math.round((completedToday / activeHabits.length) * 100) : 0;
+  const completionPercentage = scheduledOnDate.length > 0 
+    ? Math.round((completedToday / scheduledOnDate.length) * 100) 
+    : (activeHabits.length === 0 ? 0 : 100);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-obsidian-900/90 via-obsidian-850/80 to-obsidian-900/90 p-6 md:p-8 backdrop-blur-xl shadow-obsidian-card mb-8">
