@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" style="background-color: #040507; color: #F1F5F9;">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E63946'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
@@ -12,13 +12,41 @@
     <meta name="apple-mobile-web-app-title" content="Forge 365" />
     <title>FORGE 365 — Discipline & Habit Architecture</title>
     
+    <style>
+      html, body {
+        background-color: #040507 !important;
+        color: #F1F5F9 !important;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+      }
+    </style>
+
     <!-- Google Fonts: Inter, Cinzel & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+      // Diagnostic boot error catcher for production deployment
+      window.addEventListener('error', function(e) {
+        var root = document.getElementById('root');
+        if (root && root.children.length === 0) {
+          root.innerHTML = '<div style="background:#040507;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;font-family:sans-serif;text-align:center;">' +
+            '<div style="max-width:480px;background:#0d0f14;border:1px solid rgba(230,57,70,0.4);border-radius:16px;padding:32px;box-shadow:0 20px 40px rgba(0,0,0,0.8);">' +
+              '<div style="font-size:32px;margin-bottom:12px;">⚔️</div>' +
+              '<h2 style="font-size:20px;font-weight:700;margin:0 0 8px 0;color:#fff;">Forge 365 Initializing</h2>' +
+              '<p style="font-size:13px;color:#94a3b8;margin:0 0 16px 0;">If your browser cached an older build, tap below to clear cache and reload.</p>' +
+              '<pre style="background:#040507;border:1px solid rgba(255,255,255,0.1);padding:12px;border-radius:8px;color:#e63946;font-size:11px;overflow:auto;max-height:120px;text-align:left;margin-bottom:20px;">' + (e.message || 'Cache synchronization error') + '</pre>' +
+              '<button onclick="localStorage.clear();if(window.caches){caches.keys().then(function(k){k.forEach(function(c){caches.delete(c)})})};location.reload(true);" style="background:#e63946;color:#fff;font-weight:700;font-size:13px;padding:10px 20px;border:none;border-radius:10px;cursor:pointer;">Clear Cache & Refresh</button>' +
+            '</div>' +
+          '</div>';
+        }
+      });
+    </script>
   </head>
-  <body class="bg-obsidian-950 text-titanium-light font-sans antialiased selection:bg-crimson selection:text-white min-h-screen overflow-x-hidden">
-    <div id="root"></div>
+  <body style="background-color: #040507; color: #F1F5F9; min-height: 100vh; margin: 0;" class="bg-obsidian-950 text-titanium-light font-sans antialiased selection:bg-crimson selection:text-white min-h-screen overflow-x-hidden">
+    <div id="root" style="background-color: #040507; min-height: 100vh;"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
