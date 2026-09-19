@@ -23,6 +23,7 @@ export interface Habit {
   order?: number;
   reminderTime?: string; // "HH:mm" in 24h format, e.g. "05:00", "18:30"
   goalId?: string; // ID of the linked Grand Goal / Objective
+  startDate?: string; // 'YYYY-MM-DD' - date from which habit tracking begins
 }
 
 export interface HabitLogEntry {

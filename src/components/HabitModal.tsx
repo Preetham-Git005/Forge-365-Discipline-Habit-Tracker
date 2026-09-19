@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Habit, HabitCategory, TimeOfDay, HabitFrequency, HabitType, HabitPriority } from '../types';
 import { useHabits } from '../context/HabitContext';
+import { getTodayDateString } from '../utils/storage';
 import { 
   X, 
   Flame, 
@@ -77,6 +78,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
   const [placement, setPlacement] = useState<'top' | 'bottom'>('top');
   const [reminderTime, setReminderTime] = useState<string>('');
   const [goalId, setGoalId] = useState<string>(defaultGoalId || '');
+  const [startDate, setStartDate] = useState<string>(getTodayDateString());
 
   useEffect(() => {
     if (habitToEdit) {
@@ -93,6 +95,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
       setPriority(habitToEdit.priority);
       setReminderTime(habitToEdit.reminderTime || '');
       setGoalId(habitToEdit.goalId || '');
+      setStartDate(habitToEdit.startDate || (habitToEdit.createdAt ? habitToEdit.createdAt.split('T')[0] : getTodayDateString()));
     } else {
       setTitle('');
       setDescription('');
@@ -108,6 +111,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
       setPlacement('top');
       setReminderTime('');
       setGoalId(defaultGoalId || '');
+      setStartDate(getTodayDateString());
     }
   }, [habitToEdit, isOpen, defaultGoalId]);
 
@@ -138,7 +142,8 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
         icon,
         priority,
         reminderTime: reminderTime.trim() || undefined,
-        goalId: goalId.trim() || undefined
+        goalId: goalId.trim() || undefined,
+        startDate: startDate.trim() || habitToEdit.startDate || getTodayDateString()
       });
     } else {
       addHabit({
@@ -155,7 +160,8 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
         color: '#E63946',
         priority,
         reminderTime: reminderTime.trim() || undefined,
-        goalId: goalId.trim() || undefined
+        goalId: goalId.trim() || undefined,
+        startDate: startDate.trim() || getTodayDateString()
       }, placement);
     }
     onClose();
@@ -304,30 +310,30 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
             )}
           </div>
 
-          {/* Reminder Time & Grand Goal Binding */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Reminder Time, Grand Goal Binding & Active From Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             
             {/* Reminder Time Picker */}
             <div>
               <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold flex items-center space-x-1.5">
                 <Bell className="w-3.5 h-3.5 text-amber-400" />
-                <span>Timed Reminder (Optional)</span>
+                <span>Reminder (Opt)</span>
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <input
                   type="time"
                   value={reminderTime}
                   onChange={(e) => setReminderTime(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-400"
+                  className="flex-1 px-2.5 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-400"
                 />
                 {reminderTime && (
                   <button
                     type="button"
                     onClick={() => setReminderTime('')}
-                    className="px-2.5 py-2 rounded-xl bg-obsidian-950 text-slate-400 hover:text-crimson border border-white/10 text-xs"
+                    className="px-2 py-2 rounded-xl bg-obsidian-950 text-slate-400 hover:text-crimson border border-white/10 text-xs"
                     title="Clear timing"
                   >
-                    Clear
+                    ✕
                   </button>
                 )}
               </div>
@@ -337,14 +343,14 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
             <div>
               <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold flex items-center space-x-1.5">
                 <Target className="w-3.5 h-3.5 text-gold" />
-                <span>Attach to Grand Goal</span>
+                <span>Attach to Goal</span>
               </label>
               <select
                 value={goalId}
                 onChange={(e) => setGoalId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-gold"
+                className="w-full px-2.5 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-gold truncate"
               >
-                <option value="">No goal attached (Independent)</option>
+                <option value="">No goal attached</option>
                 {goals.map(g => (
                   <option key={g.id} value={g.id}>
                     🎯 {g.title}
@@ -353,7 +359,24 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, habitTo
               </select>
             </div>
 
+            {/* Active From Date */}
+            <div>
+              <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5 font-bold flex items-center space-x-1.5">
+                <Calendar className="w-3.5 h-3.5 text-crimson" />
+                <span>Active From Date</span>
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-2.5 py-2 rounded-xl bg-obsidian-950 border border-white/10 text-xs text-white focus:outline-none focus:border-crimson"
+              />
+            </div>
+
           </div>
+          <p className="text-[11px] font-mono text-slate-500">
+            🛡️ Habit tracks from its Active Date forward — previous days' completions and perfect day records remain fully intact.
+          </p>
 
           {/* Placement in List (Only for New Habits) */}
           {!habitToEdit && (

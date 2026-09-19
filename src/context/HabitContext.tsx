@@ -210,9 +210,21 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
-  // Check if a habit is scheduled for a specific date (day of week)
+  // Check if a habit is scheduled for a specific date (day of week and start date)
   const isHabitScheduledForDate = useCallback((habit: Habit, dateStr: string): boolean => {
     if (!habit || habit.archived) return false;
+    if (!dateStr) return true;
+
+    // Start date isolation: Newly created habits should ONLY be considered from their start date onwards
+    const habitStartDate = habit.startDate || (habit.createdAt ? habit.createdAt.split('T')[0] : '');
+    if (habitStartDate && dateStr < habitStartDate) {
+      // If the user already completed a log for this habit on this date, count it; otherwise it is not scheduled
+      const hasPastCompletedLog = logs.some(l => l.habitId === habit.id && l.date === dateStr && l.completed);
+      if (!hasPastCompletedLog) {
+        return false;
+      }
+    }
+
     const [y, m, d] = dateStr.split('-').map(Number);
     const date = new Date(y, m - 1, d);
     if (isNaN(date.getTime())) return true;
@@ -225,7 +237,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return habit.customDays.includes(dayOfWeek);
     }
     return true;
-  }, []);
+  }, [logs]);
 
   // Timed Reminder Monitor: Strictly checks every 30 seconds only for habits WITH timing
   useEffect(() => {
@@ -415,9 +427,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Habit management with Ordering & Goal Link
   const addHabit = useCallback((newHabitData: Omit<Habit, 'id' | 'createdAt'>, position: 'top' | 'bottom' = 'top') => {
     const newHabitId = `h-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const habitStartDate = newHabitData.startDate || getTodayDateString();
     const newHabit: Habit = {
       ...newHabitData,
       id: newHabitId,
+      startDate: habitStartDate,
       createdAt: new Date().toISOString()
     };
 
@@ -514,9 +528,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [broadcastChange]);
 
   const importHabitPack = useCallback((newHabitsData: Omit<Habit, 'id' | 'createdAt'>[]) => {
+    const todayStr = getTodayDateString();
     const createdHabits: Habit[] = newHabitsData.map((data, idx) => ({
       ...data,
       id: `pack-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+      startDate: data.startDate || todayStr,
       createdAt: new Date().toISOString()
     }));
 

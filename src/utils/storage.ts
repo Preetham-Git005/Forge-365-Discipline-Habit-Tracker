@@ -190,7 +190,14 @@ export const storage = {
         this.saveHabits(DEFAULT_INITIAL_HABITS);
         return DEFAULT_INITIAL_HABITS;
       }
-      return parsed;
+      return parsed.map((h: Habit) => {
+        if (!h.startDate) {
+          const isDefaultInitial = DEFAULT_INITIAL_HABITS.some(init => init.id === h.id);
+          const derived = isDefaultInitial ? '2026-01-01' : (h.createdAt ? h.createdAt.split('T')[0] : '2026-01-01');
+          return { ...h, startDate: derived };
+        }
+        return h;
+      });
     } catch {
       return DEFAULT_INITIAL_HABITS;
     }

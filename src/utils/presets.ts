@@ -215,7 +215,8 @@ export const DEFAULT_INITIAL_HABITS: Habit[] = [
     type: 'boolean',
     icon: 'Flame',
     color: '#E63946',
-    createdAt: new Date().toISOString(),
+    startDate: '2026-01-01',
+    createdAt: '2026-01-01T00:00:00.000Z',
     priority: 'high'
   },
   {
@@ -230,7 +231,8 @@ export const DEFAULT_INITIAL_HABITS: Habit[] = [
     unit: 'pages',
     icon: 'BookOpen',
     color: '#D4AF37',
-    createdAt: new Date().toISOString(),
+    startDate: '2026-01-01',
+    createdAt: '2026-01-01T00:00:00.000Z',
     priority: 'high'
   },
   {
@@ -245,7 +247,8 @@ export const DEFAULT_INITIAL_HABITS: Habit[] = [
     unit: 'mins',
     icon: 'Dumbbell',
     color: '#E63946',
-    createdAt: new Date().toISOString(),
+    startDate: '2026-01-01',
+    createdAt: '2026-01-01T00:00:00.000Z',
     priority: 'high'
   },
   {
@@ -260,7 +263,8 @@ export const DEFAULT_INITIAL_HABITS: Habit[] = [
     unit: 'mins',
     icon: 'Zap',
     color: '#38BDF8',
-    createdAt: new Date().toISOString(),
+    startDate: '2026-01-01',
+    createdAt: '2026-01-01T00:00:00.000Z',
     priority: 'high'
   },
   {
@@ -275,7 +279,8 @@ export const DEFAULT_INITIAL_HABITS: Habit[] = [
     unit: 'L',
     icon: 'Droplets',
     color: '#06B6D4',
-    createdAt: new Date().toISOString(),
+    startDate: '2026-01-01',
+    createdAt: '2026-01-01T00:00:00.000Z',
     priority: 'medium'
   },
   {
@@ -288,7 +293,8 @@ export const DEFAULT_INITIAL_HABITS: Habit[] = [
     type: 'boolean',
     icon: 'Feather',
     color: '#A855F7',
-    createdAt: new Date().toISOString(),
+    startDate: '2026-01-01',
+    createdAt: '2026-01-01T00:00:00.000Z',
     priority: 'medium'
   }
 ];

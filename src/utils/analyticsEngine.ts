@@ -46,6 +46,12 @@ const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frid
 const defaultIsHabitScheduled = (habit: Habit, dateStr: string): boolean => {
   if (!habit || habit.archived) return false;
   if (!dateStr) return true;
+
+  const habitStartDate = habit.startDate || (habit.createdAt ? habit.createdAt.split('T')[0] : '');
+  if (habitStartDate && dateStr < habitStartDate) {
+    return false;
+  }
+
   const [y, m, d] = dateStr.split('-').map(Number);
   const date = new Date(y, m - 1, d);
   if (isNaN(date.getTime())) return true;
